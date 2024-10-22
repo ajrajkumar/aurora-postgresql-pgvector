@@ -2,9 +2,8 @@
 
 
 export PROJ_NAME="DAT307"
-#export GITHUB_NAME="aurora-postgresql-pgvector"
 #export GITHUB_URL="https://github.com/aws-samples/"
-export GITHUB_NAME="github-dat307"
+export GITHUB_NAME="aurora-postgresql-pgvector"
 export GITHUB_URL="https://github.com/ajrajkumar/"
 export PYTHON_MAJOR_VERSION="3.12"
 export PYTHON_MINOR_VERSION="1"
