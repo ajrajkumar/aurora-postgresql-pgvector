@@ -11,6 +11,7 @@ export PYTHON_VERSION="${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}"
 export PGVERSION="16.3"
 export BASEDIR=${HOME}/environment/${PROJ_NAME}
 export AWS_PAGER=""
+export TEMP_DIR=/tmp
 
 function check_cfn_status()
 {
@@ -51,7 +52,7 @@ function install_packages()
 	return
     fi
     current_dir=`pwd`
-    cd /tmp
+    cd ${TEMP_DIR}
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" > ${TERM} 2>&1
     unzip -o awscliv2.zip > ${TERM} 2>&1
     sudo ./aws/install --update > ${TERM} 2>&1
@@ -65,7 +66,7 @@ function install_postgresql()
     print_line
     sudo yum install -y readline-devel zlib-devel gcc
     if [ ! -f /usr/local/pgsql/bin/psql ] ; then
-        cd /tmp
+        cd ${TEMP_DIR}
         wget https://ftp.postgresql.org/pub/source/v${PGVERSION}/postgresql-${PGVERSION}.tar.gz > ${TERM} 2>&1
         tar -xvf postgresql-${PGVERSION}.tar.gz > ${TERM} 2>&1
         cd postgresql-${PGVERSION}
@@ -154,6 +155,17 @@ function configure_env()
 function install_extension()
 {
     psql -h ${PGHOST} -c "create extension if not exists vector"
+}
+
+
+function load_table()
+{
+    DUMP_SQL=dump.sql
+    cp ${BASE_DIR}/data/${DUMP_SQL}.gz ${TEMP_DIR}
+    gunzip ${TEMP_DIR}/${DUMP_SQL}.gz
+    psql -h ${PGHOST} < ${TEMP_DIR}/${DUMP_SQL}
+    rm ${TEMP_DIR}/${DUMP_SQL}
+
 }
 
 function install_python3()
@@ -270,12 +282,12 @@ function install_lambda()
 
     for lambda in cw-ingest-to-dynamodb idr-bedrock-agent-action-group qa-bedrock-agent-action-group api-get-incidents api-list-runbook-kb api-action-runbook-kb
     do
-        rm -rf /tmp/${lambda}
-        mkdir /tmp/${lambda}
-        cp ${BASEDIR}/lambda/${lambda}.py /tmp/${lambda}/index.py
-        cd /tmp/${lambda}
+        rm -rf ${TEMP_DIR}/${lambda}
+        mkdir ${TEMP_DIR}/${lambda}
+        cp ${BASEDIR}/lambda/${lambda}.py ${TEMP_DIR}/${lambda}/index.py
+        cd ${TEMP_DIR}/${lambda}
         zip -r ${lambda}.zip index.py
-        aws lambda update-function-code --function-name  ${lambda}  --zip-file fileb:///tmp/${lambda}/${lambda}.zip
+        aws lambda update-function-code --function-name  ${lambda}  --zip-file fileb://${TEMP_DIR}/${lambda}/${lambda}.zip
     done
 
 }
@@ -322,6 +334,7 @@ install_python3
 print_line
 install_lambda
 print_line
+load_table
 check_installation
 cp_logfile
 
