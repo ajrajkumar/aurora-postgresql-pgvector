@@ -12,6 +12,26 @@ export PGVERSION="16.3"
 export BASEDIR=${HOME}/environment/${PROJ_NAME}
 export AWS_PAGER=""
 
+function check_cfn_status()
+{
+    typeset -i counter
+    counter=0
+    echo "Checking if the cloudformation completed successfully at `date`"
+
+    while [ $counter -lt 30 ]
+    do
+        counter=$counter+1
+        KB_IDR_S3=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRS3SourceBucketName')][].{OutputValue:OutputValue}" --output text)
+	if [ "${KB_IDR_S3}" == "" ] ; then
+            echo "The cloudformation is not yet complete.. sleeping for 30 sec -- loop ${counter} at `date`"
+        else
+            echo "The cloudformation completeted successfully - ${KB__IDR_S3} at `date`"
+	    break
+	fi
+	sleep 30
+    done
+
+}
 
 function print_line()
 {
@@ -236,6 +256,7 @@ function check_installation()
 
 function upload_kb()
 {
+    # This function is not being used by the process
     export KBIDRS3=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRS3SourceBucketName')][].{OutputValue:OutputValue}" --output text)
     export KBQAS3=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBQAS3SourceBucketName')][].{OutputValue:OutputValue}" --output text)
     export KBIDRSOURCEID=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRSourceID')][].{OutputValue:OutputValue}" --output text)
@@ -305,6 +326,7 @@ else
 fi
 
 echo "Process started at `date`"
+check_cfn_status
 install_packages
 
 export AWS_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq .region -r`
