@@ -87,8 +87,9 @@ function clone_git()
     echo "Cloning the git repository"
     print_line
     cd ${HOME}/environment
+    rm -rf ${PROJ_NAME}
     git clone ${GITHUB_URL}${GITHUB_NAME}
-    mv ${GITHUB_NAME}/${PROJ_NAME}  ${HOME}/environment
+    mv ${GITHUB_NAME}/${PROJ_NAME} ${HOME}/environment
     rm -rf ${GITHUB_NAME}
     cd ${PROJ_NAME}
     print_line
@@ -243,6 +244,16 @@ function check_installation()
 	overall="False"
     fi
 
+    # Checking if variables have proper values
+    for var in APIGWURL APIGWSTAGE APP_CLIENT_ID KB_IDR_S3 KB_QA_S3
+    do
+        if [ ${!var} == "" ] ; then
+            echo "${var} is not set propertly : NOTOK"
+	    overall="False"
+	else
+            echo "${var} is set propertly : OK"
+        fi     
+    done
 
     echo "=================================="
     if [ ${overall} == "True" ] ; then
@@ -253,38 +264,6 @@ function check_installation()
     echo "=================================="
 
 }
-
-function upload_kb()
-{
-    # This function is not being used by the process
-    export KBIDRS3=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRS3SourceBucketName')][].{OutputValue:OutputValue}" --output text)
-    export KBQAS3=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBQAS3SourceBucketName')][].{OutputValue:OutputValue}" --output text)
-    export KBIDRSOURCEID=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRSourceID')][].{OutputValue:OutputValue}" --output text)
-    export KBQASOURCEID=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBQASourceID')][].{OutputValue:OutputValue}" --output text)
-    export KBIDRID=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBIDRID')][].{OutputValue:OutputValue}" --output text)
-    export KBQAID=$(aws cloudformation describe-stacks --query "Stacks[].Outputs[?(OutputKey == 'KBQAID')][].{OutputValue:OutputValue}" --output text)
-
-    KBIDRSOURCE=`echo ${KBIDRSOURCEID} | awk -F'|' '{print $2}'`
-    ls -1 ${BASEDIR}/knowledge-base/runbooks/*.md | while read file
-    do
-        echo "File is ${file}"
-        aws s3 cp "${file}" s3://${KBIDRS3}
-    done
-
-    KBQASOURCE=`echo ${KBQASOURCEID} | awk -F'|' '{print $2}'`
-    ls -1 ${BASEDIR}/knowledge-base/documents/*.pdf | while read file
-    do
-        echo "File is ${file}"
-        aws s3 cp "${file}" s3://${KBQAS3}
-    done
-
-    aws bedrock-agent start-ingestion-job --data-source-id ${KBIDRSOURCE} --knowledge-base-id ${KBIDRID}
-    echo "aws bedrock-agent start-ingestion-job --data-source-id ${KBIDRSOURCE} --knowledge-base-id ${KBIDRID}"
-    aws bedrock-agent start-ingestion-job --data-source-id ${KBQASOURCE} --knowledge-base-id ${KBQAID}
-    echo "aws bedrock-agent start-ingestion-job --data-source-id ${KBQASOURCE} --knowledge-base-id ${KBQAID}"
-
-}
-
 
 function install_lambda()
 {
@@ -343,8 +322,6 @@ install_python3
 print_line
 install_lambda
 print_line
-# KB will be uploaded by the participants
-#upload_kb
 check_installation
 cp_logfile
 
