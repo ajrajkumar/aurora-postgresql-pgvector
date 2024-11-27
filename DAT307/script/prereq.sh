@@ -146,6 +146,7 @@ function configure_env()
     echo "export PGPASSWORD='$PGPASSWORD'" >> /home/ec2-user/.bashrc
     echo "export PGHOST=$PGHOST" >> /home/ec2-user/.bashrc
     echo "export AWS_REGION=$AWS_REGION" >> /home/ec2-user/.bashrc
+    echo "export AWS_PAGER=`"\"" >> /home/ec2-user/.bashrc
     echo "export AWSREGION=$AWS_REGION" >> /home/ec2-user/.bashrc
     echo "export PGDATABASE=postgres" >> /home/ec2-user/.bashrc
     echo "export PGPORT=5432" >> /home/ec2-user/.bashrc
@@ -157,6 +158,7 @@ function configure_env()
     echo "export KB_IDR_S3=${KB_IDR_S3}" >> /home/ec2-user/.bashrc
     echo "export KB_QA_S3=${KB_QA_S3}" >> /home/ec2-user/.bashrc
     echo "export S3_LINK_URL=${S3_LINK_URL}" >> /home/ec2-user/.bashrc
+
 }
 
 function install_extension()
