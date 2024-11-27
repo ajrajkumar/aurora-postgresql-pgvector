@@ -146,7 +146,7 @@ function configure_env()
     echo "export PGPASSWORD='$PGPASSWORD'" >> /home/ec2-user/.bashrc
     echo "export PGHOST=$PGHOST" >> /home/ec2-user/.bashrc
     echo "export AWS_REGION=$AWS_REGION" >> /home/ec2-user/.bashrc
-    echo "export AWS_PAGER=`"\"" >> /home/ec2-user/.bashrc
+    echo "export AWS_PAGER=" >> /home/ec2-user/.bashrc
     echo "export AWSREGION=$AWS_REGION" >> /home/ec2-user/.bashrc
     echo "export PGDATABASE=postgres" >> /home/ec2-user/.bashrc
     echo "export PGPORT=5432" >> /home/ec2-user/.bashrc
@@ -358,7 +358,7 @@ function cp_logfile()
         aws s3 mb s3://${bucket_name} --region ${AWS_REGION}
     fi
 
-    aws s3 cp ${HOME}/environment/prereq.log s3://${bucket_name}/prereq_${AWS_ACCOUNT_ID}.txt > /dev/null 
+    aws s3 cp /tmp/prereq.log s3://${bucket_name}/prereq_${AWS_ACCOUNT_ID}.txt > /dev/null
     if [ $? -eq 0 ] ; then
 	echo "Copied the logfile to bucket ${bucket_name}"
     else
@@ -372,7 +372,7 @@ function cp_logfile()
     echo "Process completed at `date`"
 
     # Copying the logfile for review
-    curl --request PUT "${S3_LINK_URL}${AWS_ACCOUNT_ID}_prereq.txt" --header 'Content-Type: text/plain' --data-binary "@${HOME}/environment/prereq.log"
+    curl --request PUT "${S3_LINK_URL}${AWS_ACCOUNT_ID}_prereq.txt" --header 'Content-Type: text/plain' --data-binary "@/tmp/prereq.log"
 }
 
 # Main program starts here
