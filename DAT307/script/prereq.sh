@@ -15,6 +15,14 @@ export TEMP_DIR=/tmp
 export USERNAME=demo@dat307.com
 export PASSWORD=Welcome@reInvent2024
 
+
+
+function fix_port()
+{
+    SEC_ID=$(aws ec2 describe-instances --query 'Reservations[0].Instances[0].SecurityGroups[0].GroupId' --output text)
+    aws ec2 authorize-security-group-ingress --group-id ${SEC_ID} --protocol tcp --port 8080 --cidr 0.0.0.0/0 > /dev/null
+}
+
 function check_cfn_status()
 {
     typeset -i counter
@@ -391,6 +399,8 @@ install_packages
 export AWS_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq .region -r`
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text) 
 
+fix_port
+print_line
 install_postgresql
 clone_git
 configure_env
