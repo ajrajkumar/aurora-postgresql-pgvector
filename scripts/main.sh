@@ -177,21 +177,26 @@ function configure_env()
 
 
     # Persist values in future terminals
-    echo "export PGUSER=$PGUSER" >> /home/ec2-user/.bashrc
-    echo "export PGPASSWORD='$PGPASSWORD'" >> /home/ec2-user/.bashrc
-    echo "export PGHOST=$PGHOST" >> /home/ec2-user/.bashrc
-    echo "export AWS_REGION=$AWS_REGION" >> /home/ec2-user/.bashrc
-    echo "export AWSREGION=$AWS_REGION" >> /home/ec2-user/.bashrc
-    echo "export PGDATABASE=postgres" >> /home/ec2-user/.bashrc
-    echo "export PGPORT=5432" >> /home/ec2-user/.bashrc
-    echo "export PATH=/usr/local/pgsql/bin:\${PATH}" >> /home/ec2-user/.bashrc
-    echo "export APIGWURL=${APIGWURL}" >> /home/ec2-user/.bashrc
-    echo "export APIGWSTAGE=${APIGWSTAGE}" >> /home/ec2-user/.bashrc
-    echo "export APP_CLIENT_ID=${APP_CLIENT_ID}" >> /home/ec2-user/.bashrc
-    echo "export C9_URL=${C9_URL}" >> /home/ec2-user/.bashrc
-    echo "export KB_IDR_S3=${KB_IDR_S3}" >> /home/ec2-user/.bashrc
-    echo "export KB_QA_S3=${KB_QA_S3}" >> /home/ec2-user/.bashrc
-    echo "export S3_LINK_URL=${S3_LINK_URL}" >> /home/ec2-user/.bashrc
+    {
+        echo "#Setting the environment for PostgreSQL"
+        echo "export PGUSER=$PGUSER"
+        echo "export PGPASSWORD='$PGPASSWORD'"
+        echo "export PGHOST=$PGHOST"
+        echo "export AWS_REGION=$AWS_REGION"
+        echo "export AWSREGION=$AWS_REGION"
+        echo "export PGDATABASE=postgres"
+        echo "export PGPORT=5432"
+        echo "export PATH=/usr/local/pgsql/bin:\${PATH}"
+        echo ""
+        echo "#Setting the environment for IDR Module"
+        echo "export APIGWURL=${APIGWURL}"
+        echo "export APIGWSTAGE=${APIGWSTAGE}"
+        echo "export APP_CLIENT_ID=${APP_CLIENT_ID}"
+        echo "export C9_URL=${C9_URL}"
+        echo "export KB_IDR_S3=${KB_IDR_S3}"
+        echo "export KB_QA_S3=${KB_QA_S3}"
+        echo "export S3_LINK_URL=${S3_LINK_URL}"
+    }  >> ~/.bashrc
 }
 
 function install_extension()
